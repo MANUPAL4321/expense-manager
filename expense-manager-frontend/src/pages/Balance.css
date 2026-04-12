@@ -1,0 +1,182 @@
+.balance-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    padding-top: 1rem;
+}
+
+.balance-header {
+    margin-bottom: 0.5rem;
+}
+
+.balance-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+}
+
+.balance-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* Hero Card */
+.balance-hero-card {
+    position: relative;
+    border-radius: var(--radius-xl);
+    padding: 3rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transition: all var(--transition-normal);
+}
+
+.balance-hero-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 30px 60px -12px rgba(139, 92, 246, 0.3);
+}
+
+.balance-hero-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+    z-index: 0;
+    transition: all var(--transition-slow);
+}
+
+.balance-hero-card:hover .balance-hero-bg {
+    transform: scale(1.03);
+}
+
+.balance-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.balance-hero-label {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+}
+
+.balance-hero-amount {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    margin-bottom: 1.5rem;
+}
+
+.balance-hero-amount.negative {
+    color: var(--color-expense);
+}
+
+.balance-hero-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.balance-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.balance-stat.income {
+    color: var(--color-income);
+}
+
+.balance-stat.expense {
+    color: var(--color-expense);
+}
+
+/* Monthly */
+.section-title-balance {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.monthly-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.monthly-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+}
+
+.monthly-row:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-glass-bright);
+    transform: translateX(4px);
+}
+
+.monthly-month {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.monthly-details {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.monthly-income {
+    color: var(--color-income);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.monthly-expense {
+    color: var(--color-expense);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.monthly-balance {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    min-width: 120px;
+    text-align: right;
+}
+
+.monthly-balance.negative {
+    color: var(--color-expense);
+}
+
+@media (max-width: 768px) {
+    .balance-hero-amount {
+        font-size: 2.5rem;
+    }
+
+    .monthly-details {
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-end;
+    }
+
+    .balance-title {
+        font-size: 2rem;
+    }
+}

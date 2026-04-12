@@ -1,0 +1,92 @@
+.side-panel {
+    position: fixed;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background: rgba(10, 10, 16, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-glass-bright);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem;
+    z-index: 900;
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    animation: panelSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
+}
+
+@keyframes panelSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+.side-panel-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.7rem 0.6rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    position: relative;
+    min-width: 56px;
+}
+
+.side-panel-item:hover {
+    color: var(--text-primary);
+    background: var(--bg-glass-hover);
+}
+
+.side-panel-item.active {
+    color: var(--accent-primary);
+    background: rgba(139, 92, 246, 0.12);
+}
+
+.side-panel-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 3px;
+    background: var(--accent-primary);
+    border-radius: 100px;
+    box-shadow: 0 0 12px var(--accent-primary-glow);
+}
+
+.side-panel-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition-fast);
+}
+
+.side-panel-item:hover .side-panel-icon {
+    transform: scale(1.15);
+}
+
+.side-panel-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+/* Hide on mobile */
+@media (max-width: 900px) {
+    .side-panel {
+        display: none;
+    }
+}

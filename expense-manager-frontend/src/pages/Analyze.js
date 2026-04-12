@@ -14,6 +14,7 @@ const CHART_COLORS = ['#8b5cf6', '#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#e
 
 function Analyze() {
     const { user } = useAuth();
+    const cs = user?.currencySymbol || '$';
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState('monthly');
@@ -118,7 +119,7 @@ function Analyze() {
                     <p className="tooltip-label">{label}</p>
                     {payload.map((p, i) => (
                         <p key={i} style={{ color: p.color, fontWeight: 600, fontSize: '0.85rem' }}>
-                            {p.name}: ₹{Number(p.value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                            {p.name}: {cs}{Number(p.value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </p>
                     ))}
                 </div>
@@ -135,7 +136,7 @@ function Analyze() {
                 <div className="analyze-tooltip">
                     <p className="tooltip-label">{payload[0].name}</p>
                     <p style={{ color: payload[0].payload.color, fontWeight: 600, fontSize: '0.85rem' }}>
-                        ₹{Number(payload[0].value).toLocaleString('en-IN', { minimumFractionDigits: 2 })} ({pct}%)
+                        {cs}{Number(payload[0].value).toLocaleString('en-IN', { minimumFractionDigits: 2 })} ({pct}%)
                     </p>
                 </div>
             );
@@ -145,7 +146,7 @@ function Analyze() {
 
     // Common chart axis props
     const xAxisProps = { dataKey: "label", stroke: "rgba(255,255,255,0.3)", fontSize: 12, tickLine: false, axisLine: { stroke: 'rgba(255,255,255,0.08)' } };
-    const yAxisProps = { stroke: "rgba(255,255,255,0.3)", fontSize: 12, tickLine: false, axisLine: false, tickFormatter: v => `₹${(v / 1000).toFixed(0)}k` };
+    const yAxisProps = { stroke: "rgba(255,255,255,0.3)", fontSize: 12, tickLine: false, axisLine: false, tickFormatter: v => `${cs}${(v / 1000).toFixed(0)}k` };
     const gridProps = { strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.05)" };
 
     const renderChart = () => {
@@ -255,7 +256,7 @@ function Analyze() {
                     </div>
                     <div>
                         <p className="stat-label">Total Income</p>
-                        <h3 className="stat-value income-text">₹{totalIncome.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+                        <h3 className="stat-value income-text">{cs}{totalIncome.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
                     </div>
                 </div>
                 <div className="analyze-stat-card">
@@ -264,7 +265,7 @@ function Analyze() {
                     </div>
                     <div>
                         <p className="stat-label">Total Expenses</p>
-                        <h3 className="stat-value expense-text">₹{totalExpense.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+                        <h3 className="stat-value expense-text">{cs}{totalExpense.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
                     </div>
                 </div>
                 <div className="analyze-stat-card">
@@ -273,7 +274,7 @@ function Analyze() {
                     </div>
                     <div>
                         <p className="stat-label">Net Balance</p>
-                        <h3 className={`stat-value ${totalNet >= 0 ? 'income-text' : 'expense-text'}`}>₹{totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+                        <h3 className={`stat-value ${totalNet >= 0 ? 'income-text' : 'expense-text'}`}>{cs}{totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
                     </div>
                 </div>
             </div>
@@ -374,9 +375,9 @@ function Analyze() {
                             <button className="drill-close-btn" onClick={() => setSelectedPoint(null)}>✕</button>
                         </div>
                         <div className="drill-down-summary">
-                            <span className="drill-income">Income: ₹{selectedPoint.income.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                            <span className="drill-expense">Expense: ₹{selectedPoint.expense.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                            <span className={`drill-net ${selectedPoint.net >= 0 ? '' : 'negative'}`}>Net: ₹{selectedPoint.net.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            <span className="drill-income">Income: {cs}{selectedPoint.income.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            <span className="drill-expense">Expense: {cs}{selectedPoint.expense.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            <span className={`drill-net ${selectedPoint.net >= 0 ? '' : 'negative'}`}>Net: {cs}{selectedPoint.net.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div className="drill-tx-list">
                             {selectedPoint.transactions.map((tx, i) => (
@@ -389,7 +390,7 @@ function Analyze() {
                                         </div>
                                     </div>
                                     <span className={`drill-tx-amount ${tx.type}`}>
-                                        {tx.type === 'income' ? '+' : '-'}₹{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                        {tx.type === 'income' ? '+' : '-'}{tx.currencySymbol || cs}{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                     </span>
                                 </div>
                             ))}

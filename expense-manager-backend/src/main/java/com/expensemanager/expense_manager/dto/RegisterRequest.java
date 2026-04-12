@@ -16,6 +16,8 @@ public class RegisterRequest {
     @NotBlank
     private String password;
 
+    private Long countryId;
+
     public String getUsername() {
         return username;
     }
@@ -39,4 +41,7 @@ public class RegisterRequest {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public Long getCountryId() { return countryId; }
+    public void setCountryId(Long countryId) { this.countryId = countryId; }
 }

@@ -1,5 +1,24 @@
 const BASE_URL = 'http://localhost:8080/api';
 
+/** Maps backend / DB duplicate-email wording to one clear message (covers stale servers and raw SQL errors). */
+function normalizeRegisterError(raw) {
+    if (raw == null || typeof raw !== 'string') return 'Something went wrong. Please try again.';
+    const t = raw.trim();
+    const lower = t.toLowerCase();
+    if (
+        lower.includes('duplicate entry') ||
+        lower.includes('already taken') ||
+        (lower.includes('email') &&
+            (lower.includes('taken') ||
+                lower.includes('exists') ||
+                lower.includes('unique') ||
+                lower.includes('already')))
+    ) {
+        return 'This email is already registered.';
+    }
+    return t;
+}
+
 const getToken = () => {
     const user = JSON.parse(localStorage.getItem('expense_manager_current_user'));
     return user ? user.token : null;
@@ -9,18 +28,29 @@ export const api = {
     /**
      * Register a new user
      */
-    register: async (username, email, password) => {
+    register: async (username, email, password, countryId) => {
         try {
             const response = await fetch(`${BASE_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ username, email, password, countryId })
             });
             const text = await response.text();
-            if (!response.ok) return { success: false, message: text };
+            if (!response.ok) return { success: false, message: normalizeRegisterError(text) };
             return { success: true, message: text };
         } catch (err) {
             return { success: false, message: 'Network error' };
+        }
+    },
+
+    getCountries: async (search = '') => {
+        try {
+            const query = search ? `?search=${encodeURIComponent(search)}` : '';
+            const response = await fetch(`${BASE_URL}/countries${query}`);
+            if (!response.ok) return [];
+            return await response.json();
+        } catch (err) {
+            return [];
         }
     },
 

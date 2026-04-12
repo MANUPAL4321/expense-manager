@@ -5,6 +5,7 @@ import './Balance.css';
 
 function Balance() {
     const { user } = useAuth();
+    const cs = user?.currencySymbol || '$';
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -60,16 +61,16 @@ function Balance() {
                 <div className="balance-hero-content">
                     <p className="balance-hero-label">Total Balance</p>
                     <h2 className={`balance-hero-amount ${totalBalance < 0 ? 'negative' : ''}`}>
-                        ₹{totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        {cs}{totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </h2>
                     <div className="balance-hero-stats">
                         <div className="balance-stat income">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg>
-                            <span>Income: ₹{income.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            <span>Income: {cs}{income.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div className="balance-stat expense">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline></svg>
-                            <span>Expenses: ₹{expenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            <span>Expenses: {cs}{expenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                     </div>
                 </div>
@@ -86,10 +87,10 @@ function Balance() {
                             <div key={m.key} className="monthly-row">
                                 <div className="monthly-month">{m.label}</div>
                                 <div className="monthly-details">
-                                    <span className="monthly-income">+₹{m.income.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                                    <span className="monthly-expense">-₹{m.expense.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                    <span className="monthly-income">+{cs}{m.income.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                    <span className="monthly-expense">-{cs}{m.expense.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                                     <span className={`monthly-balance ${m.balance < 0 ? 'negative' : ''}`}>
-                                        ₹{m.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                        {cs}{m.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                     </span>
                                 </div>
                             </div>

@@ -7,6 +7,7 @@ import './Dashboard.css';
 function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const cs = user?.currencySymbol || '$';
   
   // Data state
   const [paginatedData, setPaginatedData] = useState({ content: [], totalPages: 0, totalElements: 0, pageNumber: 0 });
@@ -125,7 +126,7 @@ function Dashboard() {
           <div className="master-card-content">
             <div>
               <p className="master-card-label">Total Balance</p>
-              <h2 className="master-card-amount">₹{summary.totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h2>
+              <h2 className="master-card-amount">{cs}{summary.totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h2>
             </div>
             <div className="master-card-chip"></div>
           </div>
@@ -138,7 +139,7 @@ function Dashboard() {
             </div>
             <div>
               <p className="metric-label">Total Income</p>
-              <h3 className="metric-amount">₹{summary.totalIncome.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="metric-amount">{cs}{summary.totalIncome.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
             </div>
           </div>
 
@@ -148,7 +149,7 @@ function Dashboard() {
             </div>
             <div>
               <p className="metric-label">Total Expense</p>
-              <h3 className="metric-amount">₹{summary.totalExpense.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="metric-amount">{cs}{summary.totalExpense.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
             </div>
           </div>
         </div>
@@ -218,7 +219,7 @@ function Dashboard() {
                       <span className="tx-amount" style={{
                         color: tx.type === 'income' ? 'var(--color-income)' : 'var(--color-expense)'
                       }}>
-                        {tx.type === 'income' ? '+' : '-'}₹{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        {tx.type === 'income' ? '+' : '-'}{tx.currencySymbol || cs}{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </span>
                       <span className="tx-date">{new Date(tx.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </div>

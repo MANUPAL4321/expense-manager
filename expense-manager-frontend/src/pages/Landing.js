@@ -3,11 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Landing.css';
 
+function LogoIcon({ size = 28 }) {
+    return (
+        <div className="logo-icon-wrap" style={{ width: size + 8, height: size + 8 }}>
+            <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+        </div>
+    );
+}
+
 function Landing() {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    // Redirect to dashboard if already logged in
     React.useEffect(() => {
         if (user) {
             navigate('/dashboard');
@@ -16,11 +26,11 @@ function Landing() {
 
     return (
         <div className="landing-container">
-            {/* Navigation Bar for Landing Page */}
+            {/* Navigation Bar */}
             <nav className="landing-nav">
                 <div className="logo">
-                    <span className="logo-icon">🚀</span>
-                    <span className="logo-text">Expense<span className="accent">Wise</span></span>
+                    <LogoIcon size={28} />
+                    <span className="logo-text">Expense<span className="accent">Manager</span></span>
                 </div>
                 <div className="nav-actions">
                     <button onClick={() => navigate('/login')} className="nav-btn-text">Login</button>
@@ -37,7 +47,7 @@ function Landing() {
                         <span className="text-gradient-accent">Next-Gen Intelligence</span>
                     </h1>
                     <p className="hero-description">
-                        Take full control of your finances with ExpenseWise. Track, analyze, and optimize 
+                        Take full control of your finances with ExpenseManager. Track, analyze, and optimize 
                         your spending habits with our premium glass-designed dashboard.
                     </p>
                     <div className="hero-btns">
@@ -70,13 +80,69 @@ function Landing() {
                             <div className="dot green"></div>
                         </div>
                         <div className="preview-content">
-                            <div className="skeleton title"></div>
-                            <div className="skeleton-grid">
-                                <div className="skeleton card"></div>
-                                <div className="skeleton card"></div>
-                                <div className="skeleton card"></div>
+                            {/* Greeting */}
+                            <p className="preview-greeting">Good morning, <span>John</span></p>
+
+                            {/* Summary cards */}
+                            <div className="preview-cards">
+                                <div className="preview-card preview-card--balance">
+                                    <span className="preview-card-label">Total Balance</span>
+                                    <span className="preview-card-value">$12,580.50</span>
+                                    <span className="preview-card-change preview-card-change--up">↑ 12.5%</span>
+                                </div>
+                                <div className="preview-card">
+                                    <span className="preview-card-label">Income</span>
+                                    <span className="preview-card-value preview-card-value--income">$8,450.00</span>
+                                </div>
+                                <div className="preview-card">
+                                    <span className="preview-card-label">Expense</span>
+                                    <span className="preview-card-value preview-card-value--expense">$3,120.45</span>
+                                </div>
                             </div>
-                            <div className="skeleton chart"></div>
+
+                            {/* Mini bar chart */}
+                            <div className="preview-chart">
+                                <div className="preview-chart-header">
+                                    <span className="preview-chart-title">Weekly Overview</span>
+                                    <span className="preview-chart-period">This Week</span>
+                                </div>
+                                <div className="preview-chart-bars">
+                                    {[65, 40, 85, 55, 70, 90, 45].map((h, i) => (
+                                        <div key={i} className="preview-bar-col">
+                                            <div className="preview-bar" style={{ height: `${h}%` }} />
+                                            <span className="preview-bar-label">{['M','T','W','T','F','S','S'][i]}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Recent transactions */}
+                            <div className="preview-transactions">
+                                <div className="preview-tx">
+                                    <div className="preview-tx-icon preview-tx-icon--food">🍕</div>
+                                    <div className="preview-tx-info">
+                                        <span className="preview-tx-name">Food & Dining</span>
+                                        <span className="preview-tx-date">Today, 2:30 PM</span>
+                                    </div>
+                                    <span className="preview-tx-amount preview-tx-amount--expense">-$45.00</span>
+                                </div>
+                                <div className="preview-tx">
+                                    <div className="preview-tx-icon preview-tx-icon--salary">💰</div>
+                                    <div className="preview-tx-info">
+                                        <span className="preview-tx-name">Salary Deposit</span>
+                                        <span className="preview-tx-date">Apr 1, 9:00 AM</span>
+                                    </div>
+                                    <span className="preview-tx-amount preview-tx-amount--income">+$4,250.00</span>
+                                </div>
+                                <div className="preview-tx">
+                                    <div className="preview-tx-icon preview-tx-icon--shopping">🛍️</div>
+                                    <div className="preview-tx-info">
+                                        <span className="preview-tx-name">Online Shopping</span>
+                                        <span className="preview-tx-date">Mar 30, 6:15 PM</span>
+                                    </div>
+                                    <span className="preview-tx-amount preview-tx-amount--expense">-$128.99</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div className="floating-card income">
@@ -136,8 +202,8 @@ function Landing() {
                 <div className="footer-content">
                     <div className="footer-brand">
                         <div className="logo">
-                            <span className="logo-icon">🚀</span>
-                            <span className="logo-text">Expense<span className="accent">Wise</span></span>
+                            <LogoIcon size={28} />
+                            <span className="logo-text">Expense<span className="accent">Manager</span></span>
                         </div>
                         <p>The world's most beautiful expense manager.</p>
                     </div>
@@ -163,7 +229,7 @@ function Landing() {
                     </div>
                 </div>
                 <div className="footer-bottom">
-                    <p>© 2026 ExpenseWise. All rights reserved.</p>
+                    <p>© 2026 ExpenseManager. All rights reserved.</p>
                 </div>
             </footer>
         </div>

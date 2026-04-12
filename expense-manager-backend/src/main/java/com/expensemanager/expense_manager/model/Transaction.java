@@ -33,6 +33,10 @@ public class Transaction {
     @Column(nullable = false)
     private LocalDate date;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "country_id")
+    private Country country;
+
     public Long getId() {
         return id;
     }
@@ -88,4 +92,7 @@ public class Transaction {
     public void setDate(LocalDate date) {
         this.date = date;
     }
+
+    public Country getCountry() { return country; }
+    public void setCountry(Country country) { this.country = country; }
 }

@@ -26,6 +26,8 @@ public class TransactionRequest {
     @NotNull
     private LocalDate date;
 
+    private Long countryId;
+
     public String getTitle() {
         return title;
     }
@@ -65,4 +67,7 @@ public class TransactionRequest {
     public void setDate(LocalDate date) {
         this.date = date;
     }
+
+    public Long getCountryId() { return countryId; }
+    public void setCountryId(Long countryId) { this.countryId = countryId; }
 }

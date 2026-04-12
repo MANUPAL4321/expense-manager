@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFeedback } from '../context/FeedbackContext';
@@ -11,6 +11,7 @@ function AddTransaction() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useFeedback();
+  const cs = user?.currencySymbol || '$';
   const location = useLocation();
   const editData = location.state?.transaction;
 
@@ -23,6 +24,59 @@ function AddTransaction() {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const [countrySearch, setCountrySearch] = useState(user?.country || '');
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [countryResults, setCountryResults] = useState([]);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const countryRef = useRef(null);
+  const debounceRef = useRef(null);
+
+  useEffect(() => {
+    if (user?.country) {
+      api.getCountries(user.country).then((results) => {
+        const match = results.find(c => c.name === user.country);
+        if (match) {
+          setSelectedCountry(match);
+          setCountrySearch(match.name);
+        }
+      });
+    }
+  }, [user?.country]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (countryRef.current && !countryRef.current.contains(e.target)) {
+        setShowCountryDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleCountryInput = (value) => {
+    setCountrySearch(value);
+    setSelectedCountry(null);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!value.trim()) {
+      setCountryResults([]);
+      setShowCountryDropdown(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      const results = await api.getCountries(value);
+      setCountryResults(results);
+      setShowCountryDropdown(results.length > 0);
+    }, 300);
+  };
+
+  const selectCountry = (country) => {
+    setSelectedCountry(country);
+    setCountrySearch(country.name);
+    setShowCountryDropdown(false);
+  };
 
   const isIncome = formData.type === 'income';
 
@@ -39,7 +93,6 @@ function AddTransaction() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Reset category when type changes
     if (name === 'type') {
       setFormData({ ...formData, type: value, category: '' });
     } else {
@@ -58,7 +111,11 @@ function AddTransaction() {
 
     setLoading(true);
     let result;
-    const payload = { ...formData, amount: parseFloat(formData.amount) };
+    const payload = {
+      ...formData,
+      amount: parseFloat(formData.amount),
+      countryId: selectedCountry?.id || null
+    };
 
     if (editData) {
       result = await api.updateTransaction(editData.id, payload);
@@ -143,7 +200,7 @@ function AddTransaction() {
             </div>
 
             <div className="form-group flex-1">
-              <label className="form-label" htmlFor="amount">Amount (₹)</label>
+              <label className="form-label" htmlFor="amount">Amount ({cs})</label>
               <input
                 type="number"
                 id="amount"
@@ -224,6 +281,35 @@ function AddTransaction() {
               </div>
               {errors.date && <span className="error-text">{errors.date}</span>}
             </div>
+          </div>
+
+          {/* Country selector */}
+          <div className="form-group" ref={countryRef} style={{ position: 'relative' }}>
+            <label className="form-label">Country {selectedCountry && <span className="country-currency-tag">{selectedCountry.currencySymbol} {selectedCountry.currencyCode}</span>}</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Search country (defaults to your registered country)"
+              value={countrySearch}
+              onChange={(e) => handleCountryInput(e.target.value)}
+              onFocus={() => { if (countryResults.length > 0) setShowCountryDropdown(true); }}
+              autoComplete="off"
+            />
+            {showCountryDropdown && (
+              <div className="tx-country-dropdown">
+                {countryResults.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`tx-country-option ${selectedCountry?.id === c.id ? 'active' : ''}`}
+                    onClick={() => selectCountry(c)}
+                  >
+                    <span>{c.name}</span>
+                    <span className="tx-country-currency">{c.currencySymbol} {c.currencyCode}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <button type="submit" className="primary-button submit-btn" disabled={loading} id="submit-btn">

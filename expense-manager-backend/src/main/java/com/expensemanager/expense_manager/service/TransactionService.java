@@ -4,8 +4,10 @@ import com.expensemanager.expense_manager.dto.PaginatedResponse;
 import com.expensemanager.expense_manager.dto.SummaryResponse;
 import com.expensemanager.expense_manager.dto.TransactionRequest;
 import com.expensemanager.expense_manager.dto.TransactionResponse;
+import com.expensemanager.expense_manager.model.Country;
 import com.expensemanager.expense_manager.model.Transaction;
 import com.expensemanager.expense_manager.model.User;
+import com.expensemanager.expense_manager.repository.CountryRepository;
 import com.expensemanager.expense_manager.repository.TransactionRepository;
 import com.expensemanager.expense_manager.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,16 @@ public class TransactionService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CountryRepository countryRepository;
+
+    private Country resolveCountry(Long countryId, User user) {
+        if (countryId != null) {
+            return countryRepository.findById(countryId).orElse(user.getCountry());
+        }
+        return user.getCountry();
+    }
+
     public TransactionResponse addTransaction(String email, TransactionRequest request) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -37,6 +49,7 @@ public class TransactionService {
         transaction.setCategory(request.getCategory());
         transaction.setType(request.getType());
         transaction.setDate(request.getDate());
+        transaction.setCountry(resolveCountry(request.getCountryId(), user));
 
         Transaction saved = transactionRepository.save(transaction);
         return mapToResponse(saved);
@@ -56,6 +69,7 @@ public class TransactionService {
         transaction.setCategory(request.getCategory());
         transaction.setType(request.getType());
         transaction.setDate(request.getDate());
+        transaction.setCountry(resolveCountry(request.getCountryId(), user));
 
         Transaction updated = transactionRepository.save(transaction);
         return mapToResponse(updated);
@@ -164,7 +178,17 @@ public class TransactionService {
     }
 
     private TransactionResponse mapToResponse(Transaction t) {
-        return new TransactionResponse(t.getId(), t.getTitle(), t.getAmount(), t.getCategory(), t.getType(),
-                t.getDate());
+        String countryName = null;
+        String currencyCode = null;
+        String currencySymbol = "$";
+
+        if (t.getCountry() != null) {
+            countryName = t.getCountry().getName();
+            currencyCode = t.getCountry().getCurrencyCode();
+            currencySymbol = t.getCountry().getCurrencySymbol();
+        }
+
+        return new TransactionResponse(t.getId(), t.getTitle(), t.getAmount(), t.getCategory(),
+                t.getType(), t.getDate(), countryName, currencyCode, currencySymbol);
     }
 }

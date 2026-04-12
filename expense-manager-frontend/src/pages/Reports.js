@@ -6,6 +6,7 @@ import './Reports.css';
 
 function Reports() {
     const { user } = useAuth();
+    const cs = user?.currencySymbol || '$';
     const [animated, setAnimated] = useState(false);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -119,11 +120,11 @@ function Reports() {
             <div className="metrics-row">
                 <div className="mini-metric">
                     <p className="mini-metric-label">Total Spent ({timeFilter})</p>
-                    <h3 className="mini-metric-value">₹{Math.abs(summary.totalExpense).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+                    <h3 className="mini-metric-value">{cs}{Math.abs(summary.totalExpense).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
                 </div>
                 <div className="mini-metric">
                     <p className="mini-metric-label">Total Income ({timeFilter})</p>
-                    <h3 className="mini-metric-value">₹{summary.totalIncome.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+                    <h3 className="mini-metric-value">{cs}{summary.totalIncome.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
                 </div>
                 <div className="mini-metric">
                     <p className="mini-metric-label">Transactions Found</p>
@@ -160,7 +161,7 @@ function Reports() {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    formatter={(value, name) => [`₹${Number(value).toLocaleString('en-IN')} (${((value / totalExpense) * 100).toFixed(1)}%)`, name]}
+                                    formatter={(value, name) => [`${cs}${Number(value).toLocaleString('en-IN')} (${((value / totalExpense) * 100).toFixed(1)}%)`, name]}
                                     contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }}
                                     itemStyle={{ fontWeight: 'bold' }}
                                 />
@@ -187,7 +188,7 @@ function Reports() {
                                             <div className="category-icon">{cat.icon}</div>
                                             <span className="category-name">{cat.name}</span>
                                         </div>
-                                        <span className="category-amount">₹{cat.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                        <span className="category-amount">{cs}{cat.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                     <div className="progress-track">
                                         <div
@@ -232,7 +233,7 @@ function Reports() {
                                                 <span className={`report-type-badge ${tx.type}`}>{tx.type}</span>
                                             </td>
                                             <td className={tx.type === 'income' ? 'income-amount' : 'expense-amount'}>
-                                                {tx.type === 'income' ? '+' : '-'}₹{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                {tx.type === 'income' ? '+' : '-'}{tx.currencySymbol || cs}{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                             </td>
                                         </tr>
                                     ))}

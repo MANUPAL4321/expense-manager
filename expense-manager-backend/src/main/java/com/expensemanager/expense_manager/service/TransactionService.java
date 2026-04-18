@@ -87,7 +87,8 @@ public class TransactionService {
         transactionRepository.delete(transaction);
     }
 
-    public PaginatedResponse<TransactionResponse> getTransactions(String email, String filterType, Integer month, Integer year,
+    public PaginatedResponse<TransactionResponse> getTransactions(String email, String filterType, Integer month,
+            Integer year,
             LocalDate startDate, LocalDate endDate, int page, int size) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         Long userId = user.getId();
@@ -97,7 +98,8 @@ public class TransactionService {
         if (filterType != null) {
             switch (filterType.toLowerCase()) {
                 case "day":
-                    transactionPage = transactionRepository.findByUserIdAndDateOrderByDateDesc(userId, LocalDate.now(), pageable);
+                    transactionPage = transactionRepository.findByUserIdAndDateOrderByDateDesc(userId, LocalDate.now(),
+                            pageable);
                     break;
                 case "month":
                     transactionPage = transactionRepository.findByUserIdAndMonthAndYear(userId,
@@ -129,15 +131,14 @@ public class TransactionService {
                 transactionPage.getSize(),
                 transactionPage.getTotalElements(),
                 transactionPage.getTotalPages(),
-                transactionPage.isLast()
-        );
+                transactionPage.isLast());
     }
 
     public SummaryResponse getTransactionSummary(String email, String filterType, Integer month, Integer year,
             LocalDate startDate, LocalDate endDate) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         Long userId = user.getId();
-        
+
         java.math.BigDecimal income = java.math.BigDecimal.ZERO;
         java.math.BigDecimal expense = java.math.BigDecimal.ZERO;
 
@@ -173,7 +174,7 @@ public class TransactionService {
 
         double totalIncome = income != null ? income.doubleValue() : 0.0;
         double totalExpense = expense != null ? expense.doubleValue() : 0.0;
-        
+
         return new SummaryResponse(totalIncome - totalExpense, totalIncome, totalExpense);
     }
 

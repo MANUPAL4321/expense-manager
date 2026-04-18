@@ -175,3 +175,29 @@ export const api = {
         }
     }
 };
+
+export const sendAgentMessage = async (message) => {
+    const token = getToken();
+    const response = await fetch(`${BASE_URL}/agent/chat`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ message })
+    });
+    if (!response.ok) {
+        const text = await response.text();
+        console.error('Agent chat error:', response.status, text);
+        if (response.status === 401) {
+            return { reply: '🔒 Session expired. Please log in again.' };
+        }
+        // Try parsing as JSON (our controller returns JSON errors)
+        try {
+            return JSON.parse(text);
+        } catch {
+            return { reply: `⚠️ Server error (${response.status}). Please try again.` };
+        }
+    }
+    return response.json();
+};

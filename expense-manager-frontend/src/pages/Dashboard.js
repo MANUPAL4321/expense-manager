@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
@@ -15,32 +15,16 @@ function Dashboard() {
   const [summary, setSummary] = useState({ totalBalance: 0, totalIncome: 0, totalExpense: 0 });
   const [loading, setLoading] = useState(true);
 
-  // Filter state
-  const [currentPage, setCurrentPage] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterDate, setFilterDate] = useState('');
-  const [filterType, setFilterType] = useState('all');
-
   const fetchSummary = async () => {
     const data = await api.getSummary();
     if (data) setSummary(data);
   };
 
-  const fetchTransactions = async (page = 0) => {
+  const fetchTransactions = async () => {
     if (!user) return;
     setLoading(true);
 
-    let apiFilterType = null;
-    let startDate = null;
-    let endDate = null;
-
-    if (filterDate) {
-      apiFilterType = 'range';
-      startDate = filterDate;
-      endDate = filterDate;
-    }
-
-    const data = await api.getTransactions(apiFilterType, null, null, startDate, endDate, page, 10);
+    const data = await api.getTransactions(null, null, null, null, null, 0, 5);
     if (data) {
       setPaginatedData(data);
     }
@@ -48,21 +32,9 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    fetchTransactions(currentPage);
+    fetchTransactions();
     fetchSummary();
-  }, [user, currentPage, filterDate]);
-
-  // When filter settings change (except page), reset to page 0
-  useEffect(() => {
-    setCurrentPage(0);
-  }, [filterDate]);
-
-  const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < paginatedData.totalPages) {
-      setCurrentPage(newPage);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
+  }, [user]);
 
   const getGreeting = () => {
     const currentHour = new Date().toLocaleString("en-US", {
@@ -82,27 +54,13 @@ function Dashboard() {
     if (window.confirm("Are you sure you want to delete this transaction?")) {
       const res = await api.deleteTransaction(id);
       if (res.success) {
-        fetchTransactions(currentPage);
+        fetchTransactions();
         fetchSummary();
       }
     }
   };
 
-  // We still allow a small search filter on the client-side for the current page contents for snappiness
-  const displayedTransactions = useMemo(() => {
-    let result = [...paginatedData.content];
-    if (filterType !== 'all') {
-      result = result.filter(t => t.type === filterType);
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(t =>
-        t.title.toLowerCase().includes(q) ||
-        t.category.toLowerCase().includes(q)
-      );
-    }
-    return result;
-  }, [paginatedData.content, filterType, searchQuery]);
+  const displayedTransactions = paginatedData.content;
 
   if (loading && paginatedData.content.length === 0) {
     return <div className="dashboard-container"><p style={{ color: 'white' }}>Loading dashboard...</p></div>;
@@ -157,48 +115,18 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* Transaction History with Search */}
+        {/* Recent Transactions */}
         <section className="recent-section">
           <div className="section-header">
-            <h2 className="section-title">Transactions List</h2>
-            <span className="tx-count-badge">Total: {paginatedData.totalElements} items</span>
-          </div>
-
-          {/* Search & Filter Bar */}
-          <div className="search-filter-bar" id="search-bar">
-            <div className="search-input-wrap">
-              <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Search on this page..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                id="search-input"
-              />
-            </div>
-            <div className="filter-chips">
-              <button className={`filter-chip ${filterType === 'all' ? 'active' : ''}`} onClick={() => setFilterType('all')}>All</button>
-              <button className={`filter-chip income ${filterType === 'income' ? 'active' : ''}`} onClick={() => setFilterType('income')}>Income</button>
-              <button className={`filter-chip expense ${filterType === 'expense' ? 'active' : ''}`} onClick={() => setFilterType('expense')}>Expense</button>
-              <input
-                type="date"
-                className="filter-date-input"
-                value={filterDate}
-                onChange={e => setFilterDate(e.target.value)}
-                title="Filter by date (Server-side)"
-              />
-              {filterDate && (
-                <button className="filter-chip" onClick={() => setFilterDate('')} style={{ fontSize: '0.75rem' }}>Clear Date</button>
-              )}
-            </div>
+            <h2 className="section-title">Recent Transactions</h2>
+            <Link to="/reports" className="tx-count-badge" style={{ textDecoration: 'none', cursor: 'pointer' }}>View All</Link>
           </div>
 
           <div className={`transaction-list ${loading ? 'loading-fade' : ''}`}>
             {displayedTransactions.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">🔍</div>
-                <p className="empty-text">No transactions found for these filters.</p>
+                <div className="empty-icon">💸</div>
+                <p className="empty-text">No transactions yet.</p>
               </div>
             ) : (
               <>
@@ -237,54 +165,12 @@ function Dashboard() {
                   </div>
                 ))}
 
-                {/* Pagination Controls */}
-                <div className="pagination-wrapper">
-                  <button
-                    className="pagination-btn"
-                    disabled={currentPage === 0}
-                    onClick={() => handlePageChange(currentPage - 1)}
-                  >
-                    Previous
-                  </button>
-
-                  <div className="pagination-pages">
-                    {Array.from({ length: Math.min(5, paginatedData.totalPages) }, (_, i) => {
-                      // Simple pagination logic to show max 5 pages around current
-                      let pageIdx = i;
-                      if (paginatedData.totalPages > 5) {
-                        if (currentPage > 2) pageIdx = currentPage - 2 + i;
-                        if (pageIdx >= paginatedData.totalPages) pageIdx = paginatedData.totalPages - 5 + i;
-                      }
-                      if (pageIdx < 0) return null;
-                      if (pageIdx >= paginatedData.totalPages) return null;
-
-                      return (
-                        <button
-                          key={pageIdx}
-                          className={`page-number ${currentPage === pageIdx ? 'active' : ''}`}
-                          onClick={() => handlePageChange(pageIdx)}
-                        >
-                          {pageIdx + 1}
-                        </button>
-                      );
-                    })}
-                    {paginatedData.totalPages > 5 && currentPage < paginatedData.totalPages - 3 && <span>...</span>}
-                  </div>
-
-                  <button
-                    className="pagination-btn"
-                    disabled={currentPage >= paginatedData.totalPages - 1}
-                    onClick={() => handlePageChange(currentPage + 1)}
-                  >
-                    Next
-                  </button>
-                </div>
               </>
             )}
           </div>
         </section>
       </div>
-      <AgentChat onTransactionChange={() => { fetchTransactions(currentPage); fetchSummary(); }} />
+      <AgentChat onTransactionChange={() => { fetchTransactions(); fetchSummary(); }} />
     </>
   );
 }

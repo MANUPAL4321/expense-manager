@@ -11,7 +11,7 @@ function AddTransaction() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useFeedback();
-  const cs = user?.currencySymbol || '$';
+  const cs = '₹';
   const location = useLocation();
   const editData = location.state?.transaction;
 
@@ -32,6 +32,12 @@ function AddTransaction() {
   const countryRef = useRef(null);
   const debounceRef = useRef(null);
 
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryRef = useRef(null);
+
+  const incomeCategories = ['Salary', 'Freelance', 'Investments', 'Business', 'Rental Income', 'Interest', 'Gift', 'Other'];
+  const expenseCategories = ['Food & Dining', 'Shopping', 'Housing', 'Transportation', 'Entertainment', 'Healthcare', 'Education', 'Bills & Utilities', 'Other'];
+
   useEffect(() => {
     if (user?.country) {
       api.getCountries(user.country).then((results) => {
@@ -48,6 +54,9 @@ function AddTransaction() {
     const handleClickOutside = (e) => {
       if (countryRef.current && !countryRef.current.contains(e.target)) {
         setShowCountryDropdown(false);
+      }
+      if (categoryRef.current && !categoryRef.current.contains(e.target)) {
+        setShowCategoryDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -146,7 +155,7 @@ function AddTransaction() {
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-expense)" strokeWidth="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
             )}
           </div>
-          <h2 className="form-title">{editData ? 'Edit Transaction' : 'New Transaction'}</h2>
+          <h2 className="form-title">{editData ? `Edit ${isIncome ? 'Income' : 'Expense'}` : `Add ${isIncome ? 'Income' : 'Expense'}`}</h2>
           <p className="form-subtitle">{editData ? 'Modify your existing transaction.' : 'Record your recent income or expense.'}</p>
         </div>
 
@@ -217,45 +226,43 @@ function AddTransaction() {
           </div>
 
           <div className="form-row">
-            <div className="form-group flex-1">
+            <div className="form-group flex-1" ref={categoryRef} style={{ position: 'relative' }}>
               <label className="form-label" htmlFor="category">
                 {isIncome ? 'Source' : 'Category'}
               </label>
-              <select
+              <input
+                type="text"
                 id="category"
                 name="category"
                 className={`form-input ${errors.category ? 'input-error' : ''}`}
+                placeholder={isIncome ? 'Type or select a source' : 'Type or select a category'}
                 value={formData.category}
-                onChange={handleChange}
-              >
-                <option value="" disabled>
-                  {isIncome ? 'Select a source' : 'Select a category'}
-                </option>
-                {isIncome ? (
-                  <>
-                    <option value="Salary">💰 Salary</option>
-                    <option value="Freelance">💻 Freelance</option>
-                    <option value="Investments">📈 Investments</option>
-                    <option value="Business">🏪 Business</option>
-                    <option value="Rental Income">🏠 Rental Income</option>
-                    <option value="Interest">🏦 Interest</option>
-                    <option value="Gift">🎁 Gift</option>
-                    <option value="Other">📋 Other</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="Food & Dining">🍔 Food & Dining</option>
-                    <option value="Shopping">🛍️ Shopping</option>
-                    <option value="Housing">🏠 Housing</option>
-                    <option value="Transportation">🚗 Transportation</option>
-                    <option value="Entertainment">🎮 Entertainment</option>
-                    <option value="Healthcare">💊 Healthcare</option>
-                    <option value="Education">📚 Education</option>
-                    <option value="Bills & Utilities">⚡ Bills & Utilities</option>
-                    <option value="Other">📋 Other</option>
-                  </>
-                )}
-              </select>
+                onChange={(e) => { handleChange(e); setShowCategoryDropdown(true); }}
+                onFocus={() => setShowCategoryDropdown(true)}
+                autoComplete="off"
+              />
+              {showCategoryDropdown && (
+                <div className="tx-country-dropdown" style={{ top: '100%', bottom: 'auto' }}>
+                  {(isIncome ? incomeCategories : expenseCategories)
+                    .filter(c => c.toLowerCase().includes(formData.category.toLowerCase()))
+                    .map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        className={`tx-country-option ${formData.category === c ? 'active' : ''}`}
+                        onClick={() => {
+                          setFormData({ ...formData, category: c });
+                          setShowCategoryDropdown(false);
+                        }}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  {(isIncome ? incomeCategories : expenseCategories).filter(c => c.toLowerCase().includes(formData.category.toLowerCase())).length === 0 && (
+                    <div style={{ padding: '10px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>No matches found</div>
+                  )}
+                </div>
+              )}
               {errors.category && <span className="error-text">{errors.category}</span>}
             </div>
 
@@ -317,7 +324,7 @@ function AddTransaction() {
               <span className="loading-spinner"></span>
             ) : (
               <>
-                {editData ? 'Update Transaction' : 'Save Transaction'}
+                {editData ? `Update ${isIncome ? 'Income' : 'Expense'}` : `Add ${isIncome ? 'Income' : 'Expense'}`}
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
               </>
             )}

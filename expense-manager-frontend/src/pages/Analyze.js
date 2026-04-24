@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import DatePicker from 'react-datepicker';
@@ -14,7 +14,7 @@ const CHART_COLORS = ['#8b5cf6', '#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#e
 
 function Analyze() {
     const { user } = useAuth();
-    const cs = user?.currencySymbol || '$';
+    const cs = '₹';
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState('monthly');
@@ -22,6 +22,14 @@ function Analyze() {
     const [selectedPoint, setSelectedPoint] = useState(null);
     const [customStartDate, setCustomStartDate] = useState(null);
     const [customEndDate, setCustomEndDate] = useState(null);
+    const [animated, setAnimated] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setAnimated(true), 100);
+        return () => clearTimeout(timer);
+    }, [loading]);
+
+    // No longer need tablePage effect
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -37,29 +45,56 @@ function Analyze() {
         fetchTransactions();
     }, [user]);
 
-    const getChartData = useCallback(() => {
+    const filteredTransactions = useMemo(() => {
         let filtered = [...transactions];
-
-        if (viewMode === 'custom' && customStartDate && customEndDate) {
+        const now = new Date();
+        
+        if (viewMode === 'yearly') {
+            filtered = filtered.filter(t => new Date(t.date).getFullYear() === now.getFullYear());
+        } else if (viewMode === 'monthly') {
+            filtered = filtered.filter(t => {
+                const d = new Date(t.date);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            });
+        } else if (viewMode === 'daily') {
+            filtered = filtered.filter(t => {
+                const d = new Date(t.date);
+                return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            });
+        } else if (viewMode === 'custom' && customStartDate && customEndDate) {
             filtered = filtered.filter(t => {
                 const d = new Date(t.date);
                 return d >= customStartDate && d <= customEndDate;
             });
         }
+        return filtered;
+    }, [transactions, viewMode, customStartDate, customEndDate]);
 
+    const getIcon = (categoryName) => {
+        const iconMap = {
+            'Housing': '🏠', 'Food & Dining': '🍔', 'Transportation': '🚗',
+            'Entertainment': '🎮', 'Shopping': '🛍️', 'Salary': '💰', 'Investments': '📈'
+        };
+        return iconMap[categoryName] || '📋';
+    };
+
+    const getChartData = useCallback(() => {
         const dataMap = {};
 
-        filtered.forEach(t => {
+        filteredTransactions.forEach(t => {
             const d = new Date(t.date);
             let key, label;
 
             if (viewMode === 'yearly') {
-                key = `${d.getFullYear()}`;
-                label = key;
-            } else if (viewMode === 'monthly') {
                 key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-                label = d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
-            } else if (viewMode === 'daily' || viewMode === 'custom') {
+                label = d.toLocaleDateString('en-IN', { month: 'short' });
+            } else if (viewMode === 'monthly') {
+                key = d.toISOString().split('T')[0];
+                label = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+            } else if (viewMode === 'daily') {
+                key = `${d.toISOString().split('T')[0]}-${String(d.getHours()).padStart(2, '0')}`;
+                label = `${String(d.getHours()).padStart(2, '0')}:00`;
+            } else if (viewMode === 'custom') {
                 key = d.toISOString().split('T')[0];
                 label = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
             }
@@ -76,28 +111,21 @@ function Analyze() {
             ...dataMap[k],
             net: dataMap[k].income - dataMap[k].expense
         }));
-    }, [transactions, viewMode, customStartDate, customEndDate]);
+    }, [filteredTransactions, viewMode]);
 
     const chartData = getChartData();
 
     // Category data for pie chart
     const getCategoryData = useCallback(() => {
-        let filtered = [...transactions];
-        if (viewMode === 'custom' && customStartDate && customEndDate) {
-            filtered = filtered.filter(t => {
-                const d = new Date(t.date);
-                return d >= customStartDate && d <= customEndDate;
-            });
-        }
         const categoryMap = {};
-        filtered.filter(t => t.type === 'expense').forEach(t => {
+        filteredTransactions.filter(t => t.type === 'expense').forEach(t => {
             if (!categoryMap[t.category]) categoryMap[t.category] = 0;
             categoryMap[t.category] += parseFloat(Math.abs(t.amount));
         });
         return Object.keys(categoryMap).map((name, i) => ({
-            name, value: categoryMap[name], color: CHART_COLORS[i % CHART_COLORS.length]
+            id: i + 1, name, value: categoryMap[name], amount: categoryMap[name], color: CHART_COLORS[i % CHART_COLORS.length], icon: getIcon(name)
         })).sort((a, b) => b.value - a.value);
-    }, [transactions, viewMode, customStartDate, customEndDate]);
+    }, [filteredTransactions]);
 
     const categoryData = getCategoryData();
 
@@ -165,7 +193,7 @@ function Analyze() {
             return (
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                        <Pie data={categoryData} cx="50%" cy="50%" innerRadius={80} outerRadius={130} paddingAngle={4} dataKey="value" animationDuration={1200}>
+                        <Pie data={categoryData} cx="50%" cy="50%" innerRadius={110} outerRadius={170} paddingAngle={4} dataKey="value" animationDuration={1200}>
                             {categoryData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} stroke="transparent" />
                             ))}
@@ -390,13 +418,44 @@ function Analyze() {
                                         </div>
                                     </div>
                                     <span className={`drill-tx-amount ${tx.type}`}>
-                                        {tx.type === 'income' ? '+' : '-'}{tx.currencySymbol || cs}{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                        {tx.type === 'income' ? '+' : '-'}{cs}{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                     </span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
+
+                {chartType === 'pie' && categoryData.length > 0 && (
+                    <div className="category-list" style={{ marginTop: '2rem' }}>
+                        <h3 className="chart-title-analyze" style={{ marginBottom: '1rem' }}>Category Breakdown</h3>
+                        {categoryData.map((cat) => {
+                            const percentage = (cat.value / totalExpense) * 100;
+                            return (
+                                <div key={cat.id} className="category-item">
+                                    <div className="category-info">
+                                        <div className="category-name-wrapper">
+                                            <div className="category-icon">{cat.icon}</div>
+                                            <span className="category-name">{cat.name}</span>
+                                        </div>
+                                        <span className="category-amount">{cs}{cat.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                    </div>
+                                    <div className="progress-track">
+                                        <div
+                                            className="progress-fill"
+                                            style={{
+                                                width: animated ? `${percentage}%` : '0%',
+                                                backgroundColor: cat.color,
+                                                boxShadow: `0 0 10px ${cat.color}80`
+                                            }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
             </div>
         </div>
     );

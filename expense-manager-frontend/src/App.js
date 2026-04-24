@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import AddTransaction from "./pages/AddTransaction";
-import Reports from "./pages/Reports";
-import Balance from "./pages/Balance";
+
+import History from "./pages/History";
 import Analyze from "./pages/Analyze";
 import Navbar from "./components/Navbar";
 import SidePanel from "./components/SidePanel";
@@ -50,8 +50,8 @@ function App() {
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/login" element={<Auth />} />
               <Route path="/add" element={<ProtectedRoute><AddTransaction /></ProtectedRoute>} />
-              <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-              <Route path="/balance" element={<ProtectedRoute><Balance /></ProtectedRoute>} />
+
+              <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
               <Route path="/analyze" element={<ProtectedRoute><Analyze /></ProtectedRoute>} />
             </Routes>
             <Toast />

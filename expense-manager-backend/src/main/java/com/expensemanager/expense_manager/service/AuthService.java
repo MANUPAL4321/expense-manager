@@ -97,7 +97,7 @@ public class AuthService {
 
         String countryName = null;
         String currencyCode = null;
-        String currencySymbol = "$";
+        String currencySymbol = "₹";
 
         if (user.getCountry() != null) {
             countryName = user.getCountry().getName();

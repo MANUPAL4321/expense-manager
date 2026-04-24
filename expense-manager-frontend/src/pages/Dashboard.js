@@ -8,7 +8,7 @@ import './Dashboard.css';
 function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const cs = user?.currencySymbol || '$';
+  const cs = '₹';
 
   // Data state
   const [paginatedData, setPaginatedData] = useState({ content: [], totalPages: 0, totalElements: 0, pageNumber: 0 });
@@ -119,7 +119,7 @@ function Dashboard() {
         <section className="recent-section">
           <div className="section-header">
             <h2 className="section-title">Recent Transactions</h2>
-            <Link to="/reports" className="tx-count-badge" style={{ textDecoration: 'none', cursor: 'pointer' }}>View All</Link>
+            <Link to="/analyze" className="tx-count-badge" style={{ textDecoration: 'none', cursor: 'pointer' }}>View All</Link>
           </div>
 
           <div className={`transaction-list ${loading ? 'loading-fade' : ''}`}>
@@ -149,7 +149,7 @@ function Dashboard() {
                         <span className="tx-amount" style={{
                           color: tx.type === 'income' ? 'var(--color-income)' : 'var(--color-expense)'
                         }}>
-                          {tx.type === 'income' ? '+' : '-'}{tx.currencySymbol || cs}{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          {tx.type === 'income' ? '+' : '-'}{cs}{Math.abs(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </span>
                         <span className="tx-date">{new Date(tx.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                       </div>

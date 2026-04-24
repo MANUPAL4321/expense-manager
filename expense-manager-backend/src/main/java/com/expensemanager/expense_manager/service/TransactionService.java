@@ -181,7 +181,7 @@ public class TransactionService {
     private TransactionResponse mapToResponse(Transaction t) {
         String countryName = null;
         String currencyCode = null;
-        String currencySymbol = "$";
+        String currencySymbol = "₹";
 
         if (t.getCountry() != null) {
             countryName = t.getCountry().getName();

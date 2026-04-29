@@ -24,6 +24,61 @@ function Analyze() {
     const [customEndDate, setCustomEndDate] = useState(null);
     const [animated, setAnimated] = useState(false);
 
+    const handleDownloadReport = () => {
+        const now = new Date();
+        const periodLabel = viewMode === 'custom'
+            ? `${customStartDate?.toISOString().split('T')[0]}_to_${customEndDate?.toISOString().split('T')[0]}`
+            : viewMode;
+
+        // Section 1: Financial Summary
+        const summaryRows = [
+            ['FINANCIAL SUMMARY'],
+            ['Period', periodLabel],
+            ['Total Income', `${cs}${totalIncome.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`],
+            ['Total Expenses', `${cs}${totalExpense.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`],
+            ['Net Balance', `${cs}${totalNet.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`],
+            ['Generated On', now.toLocaleString('en-IN')],
+            [],
+        ];
+
+        // Section 2: Category Breakdown
+        const catRows = [
+            ['CATEGORY BREAKDOWN'],
+            ['Category', 'Amount', '% of Expenses'],
+            ...categoryData.map(cat => [
+                cat.name,
+                `${cs}${cat.amount.toFixed(2)}`,
+                totalExpense > 0 ? `${((cat.amount / totalExpense) * 100).toFixed(1)}%` : '0%'
+            ]),
+            [],
+        ];
+
+        // Section 3: All Transactions
+        const txRows = [
+            ['ALL TRANSACTIONS'],
+            ['Date', 'Title', 'Category', 'Type', 'Amount'],
+            ...filteredTransactions.map(t => [
+                new Date(t.date).toISOString().split('T')[0],
+                `"${t.title.replace(/"/g, '""')}"`,
+                t.category,
+                t.type,
+                `${t.type === 'income' ? '+' : '-'}${Math.abs(t.amount).toFixed(2)}`
+            ])
+        ];
+
+        const allRows = [...summaryRows, ...catRows, ...txRows];
+        const csvContent = allRows.map(r => r.join(',')).join('\n');
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `financial_report_${periodLabel}_${now.toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     useEffect(() => {
         const timer = setTimeout(() => setAnimated(true), 100);
         return () => clearTimeout(timer);
@@ -274,6 +329,14 @@ function Analyze() {
                     <h1 className="analyze-title">Financial <span className="text-gradient-accent">Analysis</span></h1>
                     <p className="analyze-subtitle">Visualize your spending patterns and trends</p>
                 </div>
+                <button className="download-btn" onClick={handleDownloadReport} id="download-report-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Report
+                </button>
             </header>
 
             {/* Quick Stats */}

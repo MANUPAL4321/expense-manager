@@ -119,7 +119,7 @@ function Dashboard() {
         <section className="recent-section">
           <div className="section-header">
             <h2 className="section-title">Recent Transactions</h2>
-            <Link to="/analyze" className="tx-count-badge" style={{ textDecoration: 'none', cursor: 'pointer' }}>View All</Link>
+            <Link to="/history" className="tx-count-badge" style={{ textDecoration: 'none', cursor: 'pointer' }}>View All Transactions →</Link>
           </div>
 
           <div className={`transaction-list ${loading ? 'loading-fade' : ''}`}>

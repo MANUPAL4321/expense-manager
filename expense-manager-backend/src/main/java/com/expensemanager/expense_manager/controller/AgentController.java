@@ -30,15 +30,11 @@ public class AgentController {
             3. type must be lowercase: "expense" for money going out, "income" for money coming in.
             
             TOOL SELECTION:
-            - User spent/paid/bought something → addTransaction(type="expense")
-            - User earned/received/got paid → addTransaction(type="income")
-            - User asks balance/total/summary → getTransactionSummary
-              • "this month" → filterType="month", month=<current month number>, year=<current year>
-              • "today" → filterType="day", month=0, year=0
-              • "this year" → filterType="year", month=0, year=<current year>
-              • anything else → filterType="all", month=0, year=0
-            - User asks to show/list/see transactions → listRecentTransactions(filterType="all", limit=5)
-            - User asks to delete a transaction → deleteTransaction(transactionId=<ID>)
+            - When the user mentions spending, paying, or buying, call the addTransaction tool with type "expense".
+            - When the user mentions earning or receiving money, call the addTransaction tool with type "income".
+            - To get the balance, total spending, or summary, call the getTransactionSummary tool.
+            - To show or list recent transactions, call the listRecentTransactions tool.
+            - To delete a transaction, call the deleteTransaction tool with the specific transaction ID.
             """;
 
     // ChatClient.Builder is auto-configured by Spring AI

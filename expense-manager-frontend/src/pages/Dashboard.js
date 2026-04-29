@@ -34,6 +34,7 @@ function Dashboard() {
   useEffect(() => {
     fetchTransactions();
     fetchSummary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const getGreeting = () => {

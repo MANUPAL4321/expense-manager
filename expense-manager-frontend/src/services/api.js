@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 /** Maps backend / DB duplicate-email wording to one clear message (covers stale servers and raw SQL errors). */
 function normalizeRegisterError(raw) {
